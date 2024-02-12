@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import {
   CreateCustomerInput,
@@ -24,6 +24,15 @@ export class CustomerService {
   }
 
   async createCustomer(data: CreateCustomerInput): Promise<Customer> {
+    const existingCustomer = await this.prisma.customer.findUnique({
+      where: { email: data.email },
+    });
+    if (existingCustomer) {
+      throw new ConflictException('Email is already registered');
+    }
+
+    //TODO [consider] hash password before creation
+
     return this.prisma.customer.create({ data });
   }
 
