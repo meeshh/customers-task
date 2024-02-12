@@ -30,3 +30,30 @@ export class GetCustomerInput {
   @Field(() => WhereCustomerInput, { nullable: true })
   where: WhereCustomerInput;
 }
+
+@InputType()
+export class CreateCustomerInput {
+  @Field(() => String)
+  email: string;
+
+  @Field(() => String, { nullable: true })
+  password: string;
+}
+
+@InputType()
+export class UpdateCustomerInput {
+  @Field(() => WhereCustomerInput)
+  where: WhereCustomerInput;
+
+  @Field(() => String, { nullable: true })
+  email?: string;
+
+  @Field(() => String, { nullable: true })
+  password?: string;
+}
+
+@InputType()
+export class DeleteCustomerInput {
+  @Field(() => WhereCustomerInput)
+  where: WhereCustomerInput;
+}

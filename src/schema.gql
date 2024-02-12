@@ -35,3 +35,24 @@ input WhereCustomerInput {
   createdAt: Timestamp
   updatedAt: Timestamp
 }
+
+type Mutation {
+  createCustomer(data: CreateCustomerInput!): Customer!
+  updateCustomer(data: UpdateCustomerInput!): Customer!
+  deleteCustomer(data: DeleteCustomerInput!): Customer!
+}
+
+input CreateCustomerInput {
+  email: String!
+  password: String
+}
+
+input UpdateCustomerInput {
+  where: WhereCustomerInput!
+  email: String
+  password: String
+}
+
+input DeleteCustomerInput {
+  where: WhereCustomerInput!
+}
