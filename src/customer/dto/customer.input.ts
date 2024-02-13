@@ -1,5 +1,6 @@
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { Prisma } from '@prisma/client';
+import { Role } from 'src/lib/entities/customer.entity';
 
 @InputType()
 export class WhereCustomerInput {
@@ -9,11 +10,17 @@ export class WhereCustomerInput {
   @Field(() => String, { nullable: true })
   email?: string;
 
+  @Field(() => Boolean, { nullable: true })
+  verified?: boolean;
+
   @Field(() => Date, { nullable: true })
   createdAt?: Date;
 
   @Field(() => Date, { nullable: true })
   updatedAt?: Date;
+
+  @Field(() => String, { nullable: true })
+  role?: Role;
 }
 
 @InputType()
@@ -38,6 +45,33 @@ export class CreateCustomerInput {
 
   @Field(() => String, { nullable: true })
   password: string;
+
+  @Field(() => String, { nullable: true })
+  verificationCode: string;
+
+  @Field(() => String, { nullable: true })
+  role?: Role;
+}
+
+@InputType()
+export class UpdateCustomerInputFields {
+  @Field(() => String, { nullable: true })
+  email?: string;
+
+  @Field(() => String, { nullable: true })
+  password?: string;
+
+  @Field(() => String, { nullable: true })
+  refreshToken?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  verified?: boolean;
+
+  @Field(() => String, { nullable: true })
+  verificationCode?: string;
+
+  @Field(() => String, { nullable: true })
+  role?: Role;
 }
 
 @InputType()
@@ -45,11 +79,8 @@ export class UpdateCustomerInput {
   @Field(() => WhereCustomerInput)
   where: WhereCustomerInput;
 
-  @Field(() => String, { nullable: true })
-  email?: string;
-
-  @Field(() => String, { nullable: true })
-  password?: string;
+  @Field(() => UpdateCustomerInputFields)
+  fields?: UpdateCustomerInputFields;
 }
 
 @InputType()

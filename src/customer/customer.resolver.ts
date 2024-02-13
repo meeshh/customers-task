@@ -7,8 +7,13 @@ import {
   GetCustomerInput,
   UpdateCustomerInput,
 } from './dto/customer.input';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from './roles.decorator';
 
 @Resolver(() => Customer)
+@UseGuards(JwtAuthGuard)
 export class CustomerResolver {
   constructor(private readonly customerService: CustomerService) {}
 
@@ -18,28 +23,32 @@ export class CustomerResolver {
   }
 
   @Mutation(() => Customer)
-  async createCustomer(@Args('data') { email, password }: CreateCustomerInput) {
+  async createCustomer(
+    @Args('data')
+    { email, password, verificationCode, role }: CreateCustomerInput,
+  ) {
     const customerData = {
-      email: email,
-      password: password,
+      email,
+      password,
+      verificationCode,
+      role,
     };
 
     return this.customerService.createCustomer(customerData);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Mutation(() => Customer)
   async updateCustomer(
-    @Args('data') { where, email, password }: UpdateCustomerInput,
+    @Args('data')
+    { where, fields }: UpdateCustomerInput,
   ) {
-    const customerData = {
-      where,
-      email,
-      password,
-    };
-
-    return this.customerService.updateCustomer(customerData);
+    return this.customerService.updateCustomer({ where, fields });
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Mutation(() => Customer)
   async deleteCustomer(@Args('data') { where }: DeleteCustomerInput) {
     return this.customerService.deleteCustomer({ where });
