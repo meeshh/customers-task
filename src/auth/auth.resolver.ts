@@ -17,7 +17,7 @@ export class AuthResolver {
     const res = await this.authService.signIn(data);
     const { accessToken } = res;
 
-    // set cookies in the response
+    // set cookie in the response
     context.reply?.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: true,

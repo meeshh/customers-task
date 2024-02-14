@@ -11,9 +11,10 @@ import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from './roles.decorator';
+import { RefreshTokenGuard } from 'src/auth/refreshToken.guard';
 
 @Resolver(() => Customer)
-@UseGuards(JwtAuthGuard)
+@UseGuards(RefreshTokenGuard, JwtAuthGuard)
 export class CustomerResolver {
   constructor(private readonly customerService: CustomerService) {}
 

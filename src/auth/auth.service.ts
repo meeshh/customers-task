@@ -1,6 +1,9 @@
 import {
   ConflictException,
+  ExecutionContext,
   Injectable,
+  NotFoundException,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -10,6 +13,7 @@ import { compare, hash } from 'bcrypt';
 import { SignInInput, SignUpInput, VerifyEmailInput } from './dto/auth.input';
 import { SignInResponse } from './dto/auth.object';
 import { Customer, Role } from '@prisma/client';
+import { Context, GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class AuthService {
@@ -21,16 +25,43 @@ export class AuthService {
 
   private generateAccessToken(user: Customer): string {
     const { email, id, role } = user;
-    return this.jwtService.sign({ email, id, role });
+    return this.jwtService.sign(
+      { email, id, role },
+      { secret: process.env.JWT_SECRET, expiresIn: '1d' },
+    );
   }
 
   private generateRefreshToken(user: Customer): string {
     const { email, id, role } = user;
-    return this.jwtService.sign({ email, id, role }, { expiresIn: '7d' });
+    return this.jwtService.sign(
+      { email, id, role },
+      { secret: process.env.JWT_SECRET, expiresIn: '7d' },
+    );
   }
 
   async verifyToken(token: string): Promise<any> {
     return this.jwtService.verify(token);
+  }
+
+  async refreshAccessToken(id: string): Promise<string> {
+    const [user] = await this.customerService.findAll({
+      where: { id },
+      skip: 0,
+      take: 1,
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const accessToken = this.generateAccessToken(user);
+
+    // logging to the console for debugging purposes
+    // idealy, store in cookie... can't achieve this from service
+    // ! test with another approach
+    console.log('accessToken', accessToken);
+
+    return accessToken;
   }
 
   async validateUserById(id: string) {
@@ -42,6 +73,13 @@ export class AuthService {
     } catch (error) {
       throw new Error('User not found');
     }
+  }
+
+  isTokenExpired(decodedToken: any): boolean {
+    const expirationTime = decodedToken.exp * 1000;
+    const currentTime = Date.now();
+
+    return currentTime >= expirationTime;
   }
 
   private generateVerificationCode(): string {
